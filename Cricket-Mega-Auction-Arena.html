@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Mega Auction Arena</title>
+    <style>
+        :root {
+            --primary: #090d16;
+            --secondary: #111827;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --text: #f8fafc;
+            --card-bg: #1f2937;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--primary);
+            color: var(--text);
+            margin: 0;
+            padding: 5px;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: var(--secondary);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            border: 1px solid #374151;
+            box-sizing: border-box;
+        }
+        h1, h2, h3 {
+            color: var(--accent);
+            text-align: center;
+            margin-top: 5px;
+            font-size: 20px;
+        }
+        .btn {
+            background-color: var(--accent);
+            color: #0f172a;
+            border: none;
+            padding: 12px 16px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .btn:hover { background-color: var(--accent-hover); }
+        .btn-success { background-color: var(--success); color: white; font-size: 16px; padding: 14px; }
+        .btn-info { background-color: var(--accent); color: #0f172a; font-size: 15px; padding: 12px; }
+
+        .screen { display: none; }
+        .active { display: block; }
+
+        .card {
+            background: var(--card-bg);
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: 1px solid #374151;
+            box-sizing: border-box;
+        }
+
+        select {
+            padding: 12px;
+            margin: 6px 0;
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #4b5563;
+            background: #1f2937;
+            color: white;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+        .center { text-align: center; }
+
+        .top-toggles-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 11px;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .auction-mobile-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .auction-ring-center {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 2px dashed var(--accent);
+            border-radius: 10px;
+            text-align: center;
+            padding: 15px;
+            box-shadow: inset 0 0 10px rgba(56, 189, 248, 0.2);
+        }
+
+        .teams-grid-mobile {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .table-seat-mobile {
+            background: #1f2937;
+            border: 1px solid #4b5563;
+            padding: 8px 4px;
+            border-radius: 6px;
+            font-size: 11px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .table-seat-mobile.active-bidder {
+            border-color: var(--warning);
+            background: #78350f;
+        }
+        .table-seat-mobile.user-seat {
+            border-color: var(--success);
+            background: #064e3b;
+        }
+
+        .player-card-box {
+            background: #111827;
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-sizing: border-box;
+        }
+        .player-avatar {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent);
+            background: #374151;
+            flex-shrink: 0;
+        }
+
+        .log-box {
+            background: #0b0f19;
+            padding: 8px;
+            border-radius: 6px;
+            height: 100px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 11px;
+            color: #38bdf8;
+            border: 1px solid #374151;
+            box-sizing: border-box;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            background: #374151;
+            color: var(--accent);
+        }
+        .collapsible-pane { display: none; }
+        .collapsible-pane.show { display: block; }
+
+        .squad-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+        .squad-item {
+            background: #111827;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid #374151;
+        }
+        .squad-item img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent);
+            margin-bottom: 4px;
+        }
+        .retention-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .retention-card {
+            background: #111827;
+            border: 1px solid var(--accent);
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- MENU SCREEN -->
+    <div id="menu-screen" class="screen active">
+        <h1>🏏 Cricket Mega Auction</h1>
+        <p class="center" style="font-size: 13px;">Mobile-Optimized Realist Auction Simulation</p>
+        <div class="center" style="margin-top: 25px;">
+            <button class="btn btn-success" onclick="showScreen('setup-screen')">Start Career Mode</button>
+        </div>
+    </div>
+
+    <!-- SETUP & TOURNAMENT SCREEN -->
+    <div id="setup-screen" class="screen">
+        <h2>Configuration</h2>
+        <div class="card">
+            <label style="font-size: 13px;"><strong>Tournament Format:</strong></label>
+            <select id="tournament-select">
+                <option value="T20">T20 Franchise League</option>
+                <option value="ODI">ODI World Championship</option>
+                <option value="TEST">TEST Championship</option>
+            </select>
+            <br><br>
+            <label style="font-size: 13px;"><strong>Your Team:</strong></label>
+            <select id="team-select">
+                <option value="Mumbai Indians">Mumbai Indians</option>
+                <option value="Chennai Super Kings">Chennai Super Kings</option>
+                <option value="Royal Challengers Bengaluru">Royal Challengers Bengaluru</option>
+                <option value="Kolkata Knight Riders">Kolkata Knight Riders</option>
+                <option value="Delhi Capitals">Delhi Capitals</option>
+                <option value="Sunrisers Hyderabad">Sunrisers Hyderabad</option>
+            </select>
+            <br><br>
+            <button class="btn btn-success" onclick="goToRetentions()">View Team Retentions 📋</button>
+        </div>
+    </div>
+
+    <!-- RETENTION SCREEN -->
+    <div id="retention-screen" class="screen">
+        <h2>Franchise Retentions</h2>
+        <div style="display: flex; justify-content: space-between; background: #111827; padding: 8px; border-radius: 6px; margin-bottom: 8px; font-size: 12px;">
+            <div>Core Count: <strong style="color: var(--warning);">3 Players</strong></div>
+            <div>Purse: <strong id="retention-budget-disp" style="color: var(--success);">₹120.0 Cr</strong></div>
+        </div>
+
+        <div class="card" style="margin: 0;">
+            <h3 style="font-size: 13px; margin-top:0;" id="retention-team-title">Retained Squad</h3>
+            <div id="team-retention-list" class="retention-preview-grid"></div>
+        </div>
+        <br>
+        <button class="btn btn-success" onclick="startAuctionGameFromRetentions()">Enter Auction Arena 🔨</button>
+    </div>
+
+    <!-- AUCTION SCREEN -->
+    <div id="auction-screen" class="screen">
+        <div class="top-toggles-bar">
+            <div>
+                <label style="color: var(--accent); cursor: pointer;">
+                    <input type="checkbox" id="voice-toggle" checked style="cursor: pointer;"> 🗣️ Audio On
+                </label>
+            </div>
+            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                <button class="btn" style="padding: 4px 8px; font-size: 10px;" onclick="togglePane('franchise-status-pane')">📊 Budgets</button>
+                <button class="btn" style="padding: 4px 8px; font-size: 10px;" onclick="openOtherSquadsPane()">👥 All Squads</button>
+                <button class="btn" style="padding: 4px 8px; font-size: 10px;" onclick="togglePane('auction-log-pane')">📜 Log</button>
+            </div>
+        </div>
+
+        <div class="auction-mobile-container">
+            <!-- Auction Ring Status Box -->
+            <div class="auction-ring-center">
+                <div style="font-size: 9px; font-weight: bold; color: #94a3b8; letter-spacing: 1px;">LIVE AUCTION RING</div>
+                <div id="ring-bidding-status" style="font-size: 13px; font-weight: bold; color: var(--accent); margin-top: 4px;">Bidding Open</div>
+            </div>
+
+            <!-- Mobile Grid of Franchises -->
+            <div class="teams-grid-mobile" id="teams-grid-mobile"></div>
+
+            <!-- Player Card Box -->
+            <div class="player-card-box">
+                <img id="player-avatar-img" src="" alt="Player" class="player-avatar">
+                <div style="overflow: hidden;">
+                    <div id="player-name-disp" style="font-weight: bold; color: #38bdf8; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Player Name</div>
+                    <div style="font-size: 10px; color: #cbd5e1; margin: 2px 0;">
+                        Bracket: <span id="player-role-disp" class="badge">₹16-20 Cr</span>
+                    </div>
+                    <div style="font-size: 11px; margin-top: 2px;">
+                        Bid: <strong style="color: var(--success);">₹<span id="current-bid-disp">2.0</span> Cr</strong> (<span id="highest-bidder-disp" style="color: var(--warning);">None</span>)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bidding Actions -->
+            <div class="card" style="margin: 0; padding: 10px;">
+                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; background: #111827; padding: 6px 10px; border-radius: 6px;">
+                    <div>Team: <strong id="user-team-name-disp">MI</strong></div>
+                    <div>Purse: <strong style="color: var(--success);">₹<span id="user-budget-disp">120.0</span> Cr</strong></div>
+                </div>
+
+                <button class="btn btn-success" onclick="placeUserBid()">Raise Bid (+₹1.0 Cr)</button>
+                <div style="height: 6px;"></div>
+                <button class="btn btn-info" onclick="openSquadScreen()">View My Squad Roster</button>
+            </div>
+        </div>
+
+        <div id="auction-log-pane" class="card collapsible-pane show" style="margin-top: 8px;">
+            <h3 style="margin-top: 0; font-size: 12px;">Activity Log</h3>
+            <div id="auction-activity-log" class="log-box">Auction arena initialized...</div>
+        </div>
+
+        <div id="franchise-status-pane" class="card collapsible-pane" style="margin-top: 8px;">
+            <h3 style="margin-top: 0; font-size: 12px;">Franchise Purses</h3>
+            <div id="franchise-status-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; font-size: 11px;"></div>
+        </div>
+
+        <div id="other-squads-pane" class="card collapsible-pane" style="margin-top: 8px;">
+            <h3 style="margin-top: 0; font-size: 12px;">Other Franchise Squads</h3>
+            <select id="select-view-team" onchange="renderOtherTeamSquad()" style="margin-bottom: 8px; font-size: 12px; padding: 8px;"></select>
+            <div id="other-team-squad-list" class="squad-grid" style="max-height: 250px;"></div>
+        </div>
+    </div>
+
+    <!-- SQUAD SCREEN -->
+    <div id="squad-screen" class="screen">
+        <h2>Squad Roster</h2>
+        <div class="card">
+            <div id="squad-roster-list" class="squad-grid"></div>
+        </div>
+        <button class="btn" style="width: 100%;" onclick="showScreen('auction-screen')">Back to Auction</button>
+    </div>
+</div>
+
+<script>
+    function speakAuctioneer(text, callback) {
+        let toggle = document.getElementById('voice-toggle');
+        if (toggle && !toggle.checked) {
+            if (callback) callback();
+            return;
+        }
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            let utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.95;
+            utterance.pitch = 1.0;
+            if (callback) {
+                utterance.onend = callback;
+            }
+            window.speechSynthesis.speak(utterance);
+        } else {
+            if (callback) callback();
+        }
+    }
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }    function togglePane(paneId) {
+        let pane = document.getElementById(paneId);
+        if (pane) pane.classList.toggle('show');
+    }
+
+    function openOtherSquadsPane() {
+        let pane = document.getElementById('other-squads-pane');
+        pane.classList.toggle('show');
+        if (pane.classList.contains('show')) {
+            populateOtherTeamsDropdown();
+            renderOtherTeamSquad();
+        }
+    }
+
+    function generateAvatar(name) {
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        let c1 = Math.abs(hash) % 360;
+        let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150">
+            <rect width="150" height="150" fill="hsl(${c1}, 65%, 25%)" />
+            <circle cx="75" cy="55" r="28" fill="#cbd5e1" opacity="0.9"/>
+            <path d="M 35 125 C 35 95, 115 95, 115 125 Z" fill="#38bdf8" opacity="0.9"/>
+            <text x="75" y="140" font-family="sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">CR</text>
+        </svg>`;
+        return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+    }
+
+    const retainedPlayersMap = {
+        "Mumbai Indians": [
+            { name: "Rohit Sharma", targetPrice: 18 },
+            { name: "Jasprit Bumrah", targetPrice: 20 },
+            { name: "Hardik Pandya", targetPrice: 18 }
+        ],
+        "Chennai Super Kings": [
+            { name: "MS Dhoni", targetPrice: 16 },
+            { name: "Ravindra Jadeja", targetPrice: 18 },
+            { name: "Ruturaj Gaikwad", targetPrice: 14 }
+        ],
+        "Royal Challengers Bengaluru": [
+            { name: "Virat Kohli", targetPrice: 20 },
+            { name: "Phil Salt", targetPrice: 12 },
+            { name: "Bhuvneshwar Kumar", targetPrice: 9 }
+        ],
+        "Kolkata Knight Riders": [
+            { name: "Sunil Narine", targetPrice: 15 },
+            { name: "Andre Russell", targetPrice: 16 },
+            { name: "Harshit Rana", targetPrice: 8 }
+        ],
+        "Delhi Capitals": [
+            { name: "KL Rahul", targetPrice: 14 },
+            { name: "Kuldeep Yadav", targetPrice: 13 },
+            { name: "Jake Fraser-McGurk", targetPrice: 10 }
+        ],
+        "Sunrisers Hyderabad": [
+            { name: "Travis Head", targetPrice: 18 },
+            { name: "Abhishek Sharma", targetPrice: 14 },
+            { name: "Pat Cummins", targetPrice: 20 }
+        ]
+    };
+
+    const tier1Players = ["Shubman Gill", "Suryakumar Yadav", "Rashid Khan", "Steve Smith", "Joe Root", "Kane Williamson", "Rishabh Pant", "Mitchell Starc", "Ben Stokes", "Jos Buttler", "Heinrich Klaasen", "Kagiso Rabada"];
+    const tier2Players = ["Mohammed Shami", "Yashasvi Jaiswal", "Mohammed Siraj", "Marnus Labuschagne", "Harry Brook", "Wanindu Hasaranga", "Glenn Maxwell", "Nicholas Pooran", "Rachin Ravindra", "Jofra Archer", "Mitchell Marsh", "Adam Zampa"];
+    const tier3Players = ["Devon Conway", "Daryl Mitchell", "Marco Jansen", "Aiden Markram", "Quinton de Kock", "Glenn Phillips", "Axar Patel", "Trent Boult", "David Miller", "Cameron Green", "Sanju Samson", "Shreyas Iyer", "Liam Livingstone"];
+    const tier4Players = ["Arshdeep Singh", "Mitchell Santner", "Pathum Nissanka", "Rahmanullah Gurbaz", "Tilak Varma", "Marcus Stoinis", "Will Jacks", "Tristan Stubbs", "Charith Asalanka", "Kusal Mendis", "Shai Hope", "Sikandar Raza", "Ravi Bishnoi", "Yuzvendra Chahal", "Josh Inglis", "Chris Woakes", "Finn Allen", "Michael Bracewell", "Keshav Maharaj", "Maheesh Theekshana", "Matheesha Pathirana", "Kamindu Mendis", "Jason Holder", "Alzarri Joseph", "Shamar Joseph", "Ben Duckett"];
+    const tier5Players = ["Washington Sundar", "Varun Chakravarthy", "Sam Curran", "Matt Henry", "Mayank Yadav", "Ishan Kishan", "Tim Southee", "Nitish Kumar Reddy", "Deepak Chahar", "Rahul Tripathi", "Alex Carey", "Nathan Ellis", "Sean Abbott", "Tim David", "Jamie Smith", "Gus Atkinson", "Kyle Jamieson", "Ryan Rickelton", "Dunith Wellalage", "Nuwan Thushara", "Brandon King", "Akeal Hosein", "Sherfane Rutherford", "Romario Shepherd", "Josh Little", "Jimmy Neesham", "Blessing Muzarabani"];
+    const tier6Players = ["Prasidh Krishna", "Lungi Ngidi", "Nandre Burger", "Mark Chapman", "Gudakesh Motie", "Brydon Carse", "Reece Topley", "Ish Sodhi", "David Bedingham", "Zak Crawley", "Tim Seifert", "Curtis Campher", "Lorcan Tucker", "Bas de Leede", "Scott Edwards", "Wiaan Mulder", "Avesh Khan", "Mukesh Kumar", "Ashutosh Sharma", "Nehal Wadhera", "Xavier Bartlett", "Tanveer Sangha", "Cooper Connolly", "Tom Banton", "Jamie Overton", "Saqib Mahmood", "Will O'Rourke", "Ben Sears", "Tim Robinson", "Dushan Hemantha", "Binura Fernando", "Obed McCoy", "Olly Stone", "Matthew Potts", "Dean Foxcroft"];
+
+    function buildPlayerObjects(list, minCr, maxCr) {
+        return list.map(name => ({
+            name: name,
+            minVal: minCr,
+            maxVal: maxCr,
+            targetPrice: Math.floor(Math.random() * (maxCr - minCr + 1)) + minCr
+        }));
+    }
+
+    let masterPlayersDatabase = [
+        ...buildPlayerObjects(tier1Players, 16, 20),
+        ...buildPlayerObjects(tier2Players, 13, 16),
+        ...buildPlayerObjects(tier3Players, 10, 13),
+        ...buildPlayerObjects(tier4Players, 8, 10),
+        ...buildPlayerObjects(tier5Players, 5, 8),
+        ...buildPlayerObjects(tier6Players, 2, 5)
+    ];
+
+    let gameState = {
+        tournament: "T20",
+        userTeam: "Mumbai Indians",
+        budget: 120.0,
+        squad: [],
+        aiTeams: []
+    };
+
+    let currentRetainedList = [];
+    let masterPlayers = [];
+    let playerIdx = 0;
+    let currentBid = 2.0;
+    let highestBidder = "None";
+    let isAuctionRunning = false;
+    let activePlayerMinVal = 16;
+    let activePlayerMaxVal = 20;
+
+    function goToRetentions() {
+        gameState.tournament = document.getElementById('tournament-select').value;
+        gameState.userTeam = document.getElementById('team-select').value;
+        currentRetainedList = retainedPlayersMap[gameState.userTeam] || [];
+
+        let html = "";
+        currentRetainedList.forEach(p => {
+            html += `
+                <div class="retention-card">
+                    <img src="${generateAvatar(p.name)}" alt="${p.name}" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--accent); object-fit: cover;">
+                    <div style="font-weight: bold; margin-top: 3px;">${p.name}</div>
+                    <div style="font-size: 9px; color: var(--warning);">₹${p.targetPrice} Cr</div>
+                </div>
+            `;
+        });
+        document.getElementById('team-retention-list').innerHTML = html;
+        document.getElementById('retention-team-title').innerText = `${gameState.userTeam} Retained`;
+        document.getElementById('retention-budget-disp').innerText = `₹120.0 Cr`;
+
+        showScreen('retention-screen');
+    }
+
+    function startAuctionGameFromRetentions() {
+        gameState.budget = 120.0; 
+        gameState.squad = currentRetainedList.map(p => ({ ...p, avatar: generateAvatar(p.name) }));
+
+        let retainedNames = currentRetainedList.map(p => p.name);
+        masterPlayers = masterPlayersDatabase.filter(p => !retainedNames.includes(p.name));
+        playerIdx = 0;
+
+        let allTeams = ["Mumbai Indians", "Chennai Super Kings", "Royal Challengers Bengaluru", "Kolkata Knight Riders", "Delhi Capitals", "Sunrisers Hyderabad"];
+
+        // Setup AI Teams and map their retained players into their initial squads
+        gameState.aiTeams = allTeams.filter(t => t !== gameState.userTeam).map(name => {
+            let retList = retainedPlayersMap[name] || [];
+            let aiSquad = retList.map(p => ({ ...p, avatar: generateAvatar(p.name) }));
+            return {
+                name: name,
+                budget: 120.0,
+                squad: aiSquad
+            };
+        });
+
+        document.getElementById('user-team-name-disp').innerText = gameState.userTeam.split(' ')[0];
+        document.getElementById('user-budget-disp').innerText = gameState.budget.toFixed(1);
+
+        showScreen('auction-screen');
+        setTimeout(() => {
+            renderMobileTeamsGrid();
+            startAuctionRound();
+        }, 50);
+    }
+
+    function renderMobileTeamsGrid() {
+        let gridContainer = document.getElementById('teams-grid-mobile');
+        gridContainer.innerHTML = "";
+
+        let allSeats = [gameState.userTeam, ...gameState.aiTeams.map(t => t.name)];
+
+        allSeats.forEach((team) => {
+            let seat = document.createElement('div');
+            seat.className = `table-seat-mobile ${team === gameState.userTeam ? 'user-seat' : ''}`;
+            seat.id = `seat-${team.replace(/\s+/g, '-')}`;
+            seat.innerHTML = `<strong>${team.split(' ')[0]}</strong><br><span id="budget-${team.replace(/\s+/g, '-')}">₹120.0 Cr</span>`;
+            gridContainer.appendChild(seat);
+        });
+        updateStatusGrids();
+    }
+
+    function updateStatusGrids() {
+        let grid = document.getElementById('franchise-status-grid');
+        let html = `<div><strong>${gameState.userTeam} (You)</strong><br>₹${gameState.budget.toFixed(1)} Cr</div>`;
+        gameState.aiTeams.forEach(ai => {
+            html += `<div><strong>${ai.name}</strong><br>₹${ai.budget.toFixed(1)} Cr</div>`;
+            let bEl = document.getElementById(`budget-${ai.name.replace(/\s+/g, '-')}`);
+            if (bEl) bEl.innerText = `₹${ai.budget.toFixed(1)} Cr`;
+        });
+        let userEl = document.getElementById(`budget-${gameState.userTeam.replace(/\s+/g, '-')}`);
+        if (userEl) userEl.innerText = `₹${gameState.budget.toFixed(1)} Cr`;
+        grid.innerHTML = html;
+        document.getElementById('user-budget-disp').innerText = gameState.budget.toFixed(1);
+    }
+
+    function populateOtherTeamsDropdown() {
+        let select = document.getElementById('select-view-team');
+        let currentVal = select.value;
+        select.innerHTML = "";
+        gameState.aiTeams.forEach(ai => {
+            let opt = document.createElement('option');
+            opt.value = ai.name;
+            opt.innerText = ai.name;
+            select.appendChild(opt);
+        });
+        if (currentVal) select.value = currentVal;
+    }
+
+    function renderOtherTeamSquad() {
+        let select = document.getElementById('select-view-team');
+        if (!select || select.options.length === 0) return;
+        let selectedTeamName = select.value;
+        let aiObj = gameState.aiTeams.find(a => a.name === selectedTeamName);
+        let listContainer = document.getElementById('other-team-squad-list');
+
+        if (!aiObj || !aiObj.squad || aiObj.squad.length === 0) {
+            listContainer.innerHTML = "<p style='text-align:center; font-size:11px;'>No players acquired yet.</p>";
+            return;
+        }
+
+        let html = "";
+        aiObj.squad.forEach(pl => {
+            html += `
+                <div class="squad-item">
+                    <img src="${pl.avatar}" alt="${pl.name}">
+                    <div style="font-weight: bold; font-size: 11px;">${pl.name}</div>
+                    <div style="font-size: 10px; color: var(--warning);">₹${pl.targetPrice || pl.minVal} Cr</div>
+                </div>
+            `;
+        });
+        listContainer.innerHTML = html;
+    }
+
+    function startAuctionRound() {
+        if (playerIdx >= masterPlayers.length) {
+            logActivity("Mega Auction completed for all players!");
+            document.getElementById('ring-bidding-status').innerText = "Auction Completed";
+            speakAuctioneer("The mega auction has concluded successfully.");
+            isAuctionRunning = false;
+            return;
+        }
+        let p = masterPlayers[playerIdx];
+        currentBid = 2.0;
+        highestBidder = "None";
+        activePlayerMinVal = p.minVal;
+        activePlayerMaxVal = p.maxVal;
+
+        document.getElementById('player-avatar-img').src = generateAvatar(p.name);
+        document.getElementById('player-name-disp').innerText = p.name;
+        document.getElementById('player-role-disp').innerText = `₹${p.minVal}-${p.maxVal} Cr`;
+        document.getElementById('current-bid-disp').innerText = currentBid.toFixed(1);
+        document.getElementById('highest-bidder-disp').innerText = highestBidder;
+        document.getElementById('ring-bidding-status').innerText = `Bidding Open: ${p.name}`;
+
+        let announcement = `Next player up, ${p.name}. Base price 2 crores.`;
+        logActivity(announcement);
+
+        speakAuctioneer(announcement, () => {
+            isAuctionRunning = true;
+            setTimeout(runAIAutoBidding, 2000);
+        });
+    }
+
+    function logActivity(text) {
+        let box = document.getElementById('auction-activity-log');
+        if (box) {
+            box.innerHTML += `<div>💡 ${text}</div>`;
+            box.scrollTop = box.scrollHeight;
+        }
+    }
+
+    function highlightSeat(teamName) {
+        document.querySelectorAll('.table-seat-mobile').forEach(s => s.classList.remove('active-bidder'));
+        if (teamName && teamName !== "None") {
+            let seat = document.getElementById(`seat-${teamName.replace(/\s+/g, '-')}`);
+            if (seat) seat.classList.add('active-bidder');
+        }
+    }
+
+    function runAIAutoBidding() {
+        if (!isAuctionRunning) return;
+
+        let stoppingThreshold = currentBid < activePlayerMinVal ? activePlayerMinVal : activePlayerMaxVal;
+        let activeAI = gameState.aiTeams.filter(ai => ai.budget >= currentBid + 1.0);
+
+        if (activeAI.length > 0 && currentBid < stoppingThreshold) {
+            let bidder = activeAI[Math.floor(Math.random() * activeAI.length)];
+            if (bidder.name !== highestBidder) {
+                currentBid += 1.0;
+                highestBidder = bidder.name;
+                document.getElementById('current-bid-disp').innerText = currentBid.toFixed(1);
+                document.getElementById('highest-bidder-disp').innerText = highestBidder;
+                highlightSeat(highestBidder);
+
+                let text = `${bidder.name} bids ${currentBid} crores.`;
+                logActivity(text);
+
+                speakAuctioneer(`${bidder.name} bids ${currentBid} crores`, () => {
+                    setTimeout(runAIAutoBidding, 2200);
+                });
+                return;
+            }
+        }
+        completeHammer();
+    }
+
+    function placeUserBid() {
+        if (!isAuctionRunning) return;
+        if (gameState.budget < currentBid + 1.0) {
+            alert("Insufficient purse!");
+            return;
+        }
+        if (highestBidder === gameState.userTeam) return;
+
+        currentBid += 1.0;
+        highestBidder = gameState.userTeam;
+        document.getElementById('current-bid-disp').innerText = currentBid.toFixed(1);
+        document.getElementById('highest-bidder-disp').innerText = highestBidder;
+        highlightSeat(highestBidder);
+
+        let text = `${gameState.userTeam} raises to ${currentBid} crores.`;
+        logActivity(text);
+
+        speakAuctioneer(`You bid ${currentBid} crores.`, () => {
+            setTimeout(runAIAutoBidding, 2200);
+        });
+    }
+
+    function completeHammer() {
+        isAuctionRunning = false;
+        let p = masterPlayers[playerIdx];
+        highlightSeat(null);
+
+        if (highestBidder === "None") {
+            let text = `${p.name} went unsold.`;
+            logActivity(text);
+            speakAuctioneer(`${p.name} goes unsold.`, proceedNextPlayer);
+        } else if (highestBidder === gameState.userTeam) {
+            gameState.budget -= currentBid;
+            gameState.squad.push({ ...p, targetPrice: currentBid, avatar: generateAvatar(p.name) });
+            let text = `SOLD! ${gameState.userTeam} bought ${p.name} for ₹${currentBid.toFixed(1)} Cr.`;
+            logActivity(text);
+            speakAuctioneer(`Sold! To ${gameState.userTeam} for ${currentBid} crores.`, proceedNextPlayer);
+        } else {
+            let ai = gameState.aiTeams.find(a => a.name === highestBidder);
+            if (ai) {
+                ai.budget -= currentBid;
+                ai.squad.push({ ...p, targetPrice: currentBid, avatar: generateAvatar(p.name) });
+            }
+            let text = `SOLD! ${highestBidder} bought ${p.name} for ₹${currentBid.toFixed(1)} Cr.`;
+            logActivity(text);
+            speakAuctioneer(`Sold! To ${highestBidder} for ${currentBid} crores.`, proceedNextPlayer);
+        }
+
+        updateStatusGrids();
+        renderOtherTeamSquad();
+    }
+
+    function proceedNextPlayer() {
+        playerIdx++;
+        setTimeout(startAuctionRound, 3000);
+    }
+
+    function openSquadScreen() {
+        let html = "";
+        gameState.squad.forEach(pl => {
+            html += `
+                <div class="squad-item">
+                    <img src="${pl.avatar}" alt="${pl.name}">
+                    <div style="font-weight: bold; font-size: 11px;">${pl.name}</div>
+                    <div style="font-size: 10px; color: var(--warning);">₹${pl.targetPrice || pl.minVal} Cr</div>
+                </div>
+            `;
+        });
+        document.getElementById('squad-roster-list').innerHTML = html || "<p style='text-align:center;'>No players acquired yet.</p>";
+        showScreen('squad-screen');
+    }
+</script>
+</body>
+</html>
